@@ -1,0 +1,49 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="OrderReceipt" t-inherit="point_of_sale.OrderLinesReceipt" t-inherit-mode="extension" owl="1">
+        <xpath expr="//table[@class='sale-order-info']" position="replace">
+            <table class="custom-sale-order-info">
+                    <!-- Initialize a sum_total variable -->
+                    <t t-set="sum_total" t-value="0.0"/>
+                    <!-- Iterate through each line in 'down_payment_details' -->
+                    <tr t-foreach='line.down_payment_details' t-as='downpayment_line' t-key='downpayment_line.id'>
+                        <td><t t-esc="downpayment_line['product_uom_qty']" /> x </td> <!-- Space after quantity -->
+                        <td style="max-width: 200px;">
+                            <t t-esc="downpayment_line['product_name']" />
+                            <div class="pos-receipt-left-align">
+                                AMOUNT:
+                                <span t-esc="env.pos.format_currency(downpayment_line['total'])"/>
+                            </div>
+                        </td>
+                        <!-- Accumulate the sum_total variable -->
+                        <t t-set="sum_total" t-value="sum_total + downpayment_line['total']"/>
+                    </tr>
+                    <!-- Display the total amount after all line items -->
+                    <div class="pos-receipt-left-align">--------</div>
+                    <tr>
+                        <td colspan="2">
+                            TOTAL AMOUNT:
+                            <!-- Display the accumulated sum_total as Total Amount -->
+                            <span t-esc="env.pos.format_currency(sum_total)"/>
+                        </td>
+                    </tr>
+                    <!-- Display the advance amount paid by customer -->
+                    <tr>
+                        <td colspan="2">
+                            ADVANCE AMOUNT:
+                            <span t-esc="env.pos.format_currency(receipt.total_with_tax)"/>
+                        </td>
+                    </tr>
+                    <!-- Calculate and display the remaining amount -->
+                    <tr>
+                        <td colspan="2">
+                            REMAINING AMOUNT:
+                            <!-- Calculate remaining amount as total - advance amount -->
+                            <span t-esc="env.pos.format_currency(sum_total - receipt.total_with_tax)"/>
+                        </td>
+                     </tr>
+               <div class="pos-receipt-left-align">--------</div>
+                    
+              </table>
+        </xpath>
+    </t>
+</templates>
